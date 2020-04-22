@@ -1,0 +1,16 @@
+global:
+  owner: mihail
+  qsname: sample-taskcat-project
+  regions:
+    - eu-central-1
+    - eu-west-1
+    - sa-east-1
+    - us-east-1
+    - us-west-1
+    - us-west-2
+tests:
+  taskcat-json:
+    parameter_input: parameters.json
+    regions:
+      - eu-west-1
+    template_file: ./cf.yml

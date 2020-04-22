@@ -4,17 +4,19 @@ phases:
     runtime-versions:
       python: 3.7
     commands:
-      - echo install phase started on `date`
+      - whoami
       - python --version
-      - 'curl -O https://bootstrap.pypa.io/get-pip.py'
-      - python3 get-pip.py
+      - curl -O https://bootstrap.pypa.io/get-pip.py
+      - python3 get-pip.py --user
       - pip install --upgrade pip
-      - pip3 install taskcat
+      - pip3 install taskcat --user
+      - taskcat --version
   build:
     commands:
       - echo Build phase started on `date`
       # - taskcat test run
-      - taskcat test run --no-delete
+      - cd TaskCat-example/ci/
+      - taskcat test run
   post_build:
     commands:
       - echo Build completed on `date`

@@ -1,0 +1,355 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "dsadasd Configuration"
+          },
+          "Parameters": [
+            "dsadasdLanguage"
+          ]
+        },
+        {
+          "Label": {
+            "default": "EC2 Configuration"
+          },
+          "Parameters": [
+            "KeyPairName",
+            "OperatingSystemVolumeSize",
+            "DeleteOperatingSystemVolume"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Network Configuration"
+          },
+          "Parameters": [
+            "dsadasdWebClientIngressCIDRBlock",
+            "RDPIngressCIDRBlock",
+            "VPCCIDRBlock",
+            "SubnetCIDRBlock"
+          ]
+        }
+      ],
+      "ParameterLabels": [
+        {
+          "dsadasdLanguage": {
+            "default": "dsadasd Language"
+          }
+        },
+        {
+          "KeyPairName": {
+            "default": "Key Pair Name"
+          }
+        },
+        {
+          "OperatingSystemVolumeSize": {
+            "default": "Operating System Volume Size"
+          }
+        },
+        {
+          "DeleteOperatingSystemVolume": {
+            "default": "Delete Operating System Volume"
+          }
+        },
+        {
+          "dsadasdWebClientIngressCIDRBlock": {
+            "default": "dsadasd Web Client Ingress CIDR Block"
+          }
+        },
+        {
+          "RDPIngressCIDRBlock": {
+            "default": "RDP Ingress CIDR Block"
+          }
+        },
+        {
+          "VPCCIDRBlock": {
+            "default": "VPC CIDR Block"
+          }
+        },
+        {
+          "SubnetCIDRBlock": {
+            "default": "Subnet CIDR Block"
+          }
+        }
+      ]
+    }
+  },
+  "Parameters": {
+    "dsadasdWebClientIngressCIDRBlock": {
+      "Type": "String",
+      "AllowedPattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+      "ConstraintDescription": "X.X.X.X/XX.",
+      "Description": "The Ingress CIDR IP block that can access the EC2 instance via HTTPS."
+    },
+    "VPCCIDRBlock": {
+      "Type": "String",
+      "Default": "10.0.0.0/16",
+      "AllowedPattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+      "ConstraintDescription": "X.X.X.X/XX.",
+      "Description": "The CIDR IP block that is allocated to the VPC."
+    },
+    "SubnetCIDRBlock": {
+      "Type": "String",
+      "Default": "10.0.0.0/24",
+      "AllowedPattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+      "ConstraintDescription": "X.X.X.X/XX.",
+      "Description": "The CIDR IP block that is allocated to the EC2 subnet."
+    },
+    "RDPIngressCIDRBlock": {
+      "Type": "String",
+      "AllowedPattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+      "ConstraintDescription": "X.X.X.X/XX.",
+      "Description": "The CIDR IP block that can access the EC2 instance via RDP."
+    },
+    "OperatingSystemVolumeSize": {
+      "Type": "Number",
+      "Default": 150,
+      "Description": "The size in GB of the operating system volume (100GB minimum).",
+      "MinValue": 100
+    },
+    "KeyPairName": {
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "Description": "The key pair used to decrypt the EC2 instance password."
+    },
+    "DeleteOperatingSystemVolume": {
+      "Type": "String",
+      "Default": "true",
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Description": "Delete the operating system volume on termination of the EC2 instance."
+    },
+    "dsadasdLanguage": {
+      "Type": "String",
+      "Default": "en-US",
+      "AllowedValues": [
+        "en-US",
+        "da-DK",
+        "de-DE",
+        "es-ES",
+        "fr-FR",
+        "it-IT",
+        "ja-JP",
+        "ko-KR",
+        "pt-BR",
+        "ru-RU",
+        "sv-SE",
+        "tr-TR",
+        "zh-CN",
+        "zh-TW"
+      ],
+      "Description": "The language of the dsadasd VMS software."
+    }
+  },
+  "Mappings": {
+    "RegionMap": {
+      "us-east-1": {
+        "WindowsServer2019": "PLACEHOLDER"
+      },
+      "eu-west-1": {
+        "WindowsServer2019": "PLACEHOLDER"
+      }
+    }
+  },
+  "Resources": {
+    "VPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": {
+          "Ref": "VPCCIDRBlock"
+        },
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "name",
+            "Value": "dsadasd_VPC"
+          }
+        ]
+      }
+    },
+    "IG": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "name",
+            "Value": "dsadasd_IG"
+          }
+        ]
+      }
+    },
+    "AttachIG": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "InternetGatewayId": {
+          "Ref": "IG"
+        }
+      }
+    },
+    "RT": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "Tags": [
+          {
+            "Key": "name",
+            "Value": "dsadasd_RT"
+          }
+        ]
+      }
+    },
+    "SUBNET": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": {
+          "Ref": "SubnetCIDRBlock"
+        },
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "name",
+            "Value": "dsadasd_SUBNET"
+          }
+        ]
+      }
+    },
+    "AttachRT": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "RT"
+        },
+        "SubnetId": {
+          "Ref": "SUBNET"
+        }
+      }
+    },
+    "SG": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Configure network traffic to and from the VMS EC2 instance",
+        "Tags": [
+          {
+            "Key": "name",
+            "Value": "dsadasd_SG"
+          }
+        ],
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "SecurityGroupEgress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 443,
+            "ToPort": 443,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "INGRESS": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": "tcp",
+        "CidrIp": {
+          "Ref": "RDPIngressCIDRBlock"
+        },
+        "FromPort": 3389,
+        "GroupId": {
+          "Ref": "SG"
+        },
+        "ToPort": 3389
+      }
+    },
+    "EC2": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": {
+                "Ref": "DeleteOperatingSystemVolume"
+              },
+              "VolumeSize": {
+                "Ref": "OperatingSystemVolumeSize"
+              },
+              "VolumeType": "gp2"
+            }
+          }
+        ],
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "WindowsServer2019"
+          ]
+        },
+        "InstanceType": "t3.medium",
+        "KeyName": {
+          "Ref": "KeyPairName"
+        },
+        "NetworkInterfaces": [
+          {
+            "AssociatePublicIpAddress": true,
+            "DeviceIndex": "0",
+            "GroupSet": [
+              {
+                "Ref": "SG"
+              }
+            ],
+            "SubnetId": {
+              "Ref": "SUBNET"
+            }
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "name",
+            "Value": "dsadasd_EC2"
+          }
+        ],
+              },
+      "CreationPolicy": {
+        "ResourceSignal": {
+          "Timeout": "PT45M",
+          "Count": 1
+        }
+      }
+    },
+    "ROUTETOVPC": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "RT"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "IG"
+        }
+      }
+    }
+  }
+}

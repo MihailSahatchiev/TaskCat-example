@@ -1,0 +1,34 @@
+[
+    {
+        "ParameterKey": "XProtectWebClientIngressCIDRBlock",
+        "ParameterValue": "10.0.0.16/32"
+    },
+    {
+        "ParameterKey": "VPCCIDRBlock",
+        "ParameterValue": "10.0.0.0/16"
+    },
+    {
+        "ParameterKey": "SubnetCIDRBlock",
+        "ParameterValue": "10.0.0.0/24"
+    },
+    {
+        "ParameterKey": "RDPIngressCIDRBlock",
+        "ParameterValue": "93.183.184.81/32"
+    },
+    {
+        "ParameterKey": "OperatingSystemVolumeSize",
+        "ParameterValue": "150"
+    },
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "misho"
+    },
+    {
+        "ParameterKey": "DeleteOperatingSystemVolume",
+        "ParameterValue": "true"
+    },
+    {
+        "ParameterKey": "XProtectLanguage",
+        "ParameterValue": "en-US"
+    }
+]
